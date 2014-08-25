@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+  
+  <head>
+    <meta charset="utf-8">
+    <title>D3 randomI</title>
+    <script type="text/javascript"  src="http://d3js.org/d3.v3.min.js"></script>
+    <style type="text/css">
+      
+      .axis path,
+      .axis line {
+        fill: none;
+        stroke: black;
+        shape-rendering: crispEdges;
+      }
+      
+      .axis text {
+        font-family: sans-serif;
+        font-size: 11px;
+      }
+    </style>    
+  </head>
+
+  <body>
+    <script type="text/javascript">
+
+      //para SVG
+      var w = 500;
+      var h = 300;
+      var padding = 30;      
+      
+      //Aleatoria dinámica
+      var dataset = [];         //para rellenar
+      var ptosv=numpuntos = 50;       //muestras      
+      var yRange = Math.random() + 1;  //Max rangoY
+      var abcisa, ordenada;
+
+      function tempo() {
+        abcisa = new Date().getTime();
+        ordenada = Math.random() * yRange;
+        dataset.push([abcisa, ordenada]);//a la buchaca
+        ptosv--; //vueltas del bombo
+        if(ptosv==0)
+          { clearInterval(ctrl);
+            representar();}
+      }
+
+      function representar() {
+            //escalado
+            var xScale = d3.scale.linear()
+                       .domain([dataset[0][0],dataset[numpuntos-1][0]])
+                       .range([padding, w - padding * 2]);
+
+            var yScale = d3.scale.linear()
+                       .domain([0, d3.max(dataset, function(d) { return d[1]; })])
+                       .range([h - padding, padding]);
+
+            var rScale = d3.scale.linear()//radio proporcional a la altura
+                       .domain([0, d3.max(dataset, function(d) { return d[1]; })])
+                       .range([2, 5]);
+
+            var formatillo = d3.format("f");//fixed //prueba porcentual con un decimal
+
+           // var temporal=d3.time.format("%X");
+            //var fecha=d3.time.format("%x");
+
+            //Define X 
+            var xAxis = d3.svg.axis()
+                      .scale(xScale)
+                      .orient("bottom")
+                      .ticks(5)
+              //        .tickFormat(temporal); //
+
+            //Define Y 
+            var yAxis = d3.svg.axis()
+                      .scale(yScale)
+                      .orient("left")
+                      .ticks(5)
+                //      .tickFormat(formatillo);
+
+            //Elemento SVG
+            var svg = d3.select("body")
+                  .append("svg")
+                  .attr("width", w)
+                  .attr("height", h);
+
+            //Representación circular escalada
+            svg.selectAll("circle")
+               .data(dataset)
+               .enter()
+               .append("circle")
+               .attr("cx", function(d) {
+                  return xScale(d[0]);
+               })
+               .attr("cy", function(d) {
+                  return yScale(d[1]);
+               })
+               .attr("r", function(d) {
+                  return rScale(d[1]);
+               });
+
+
+
+
+
+
+
+            //situar abajo (creciente) el ejeX
+            svg.append("g")
+              .attr("class", "axis")
+              .attr("transform", "translate(0," + (h - padding) + ")")
+              .call(xAxis);
+      
+            //situar izquierda (salvo margen) el ejeY
+            svg.append("g")
+              .attr("class", "axis")
+              .attr("transform", "translate(" + padding + ",0)")
+              .call(yAxis);
+      }
+       
+        var ctrl = setInterval(function(){tempo()},10);
+
+        
+         
+    </script>
+  </body>
+</html>
